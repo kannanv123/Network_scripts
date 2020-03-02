@@ -1,0 +1,41 @@
+import paramiko
+import sys
+import time
+import subprocess
+#
+# we instantiate a new object referencing paramiko's SSHClient class
+#
+vm = paramiko.SSHClient()
+vm.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+vm.connect('10.61.95.148', username='**********', password='********')
+#
+vmtransport = vm.get_transport()
+dest_addr = ('10.90.216.69', 22)
+local_addr = ('10.61.95.148', 22) 
+vmchannel = vmtransport.open_channel("direct-tcpip", dest_addr, local_addr)
+#
+jhost = paramiko.SSHClient()
+jhost.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+#jhost.load_host_keys('/home/osmanl/.ssh/known_hosts') #disabled#
+jhost.connect('10.90.216.69', username='******', password='*********', sock=vmchannel)
+remote_conn = jhost.invoke_shell(term: str=builtins.str,width: int=100,height: int=1000,width_pixels: int=0,height_pixels: int=0,environment: NoneType=None)
+remote_conn.send('\n')
+remote_conn.send('enable\n')
+time.sleep(1)
+en_password = "********" + '\n'
+remote_conn.send(en_password)
+time.sleep(1)
+output = remote_conn.recv(1000000)
+remote_conn.send("term len 0\n")
+remote_conn.send("sh run\n")
+#wait a couple of seconds
+time.sleep(1)
+output = remote_conn.recv(1000000)
+output1 = str(output).split('\r\n')
+a='\n'.join(output1)
+print(a)
+
+#
+jhost.close()
+vm.close()
+# End
