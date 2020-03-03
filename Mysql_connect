@@ -1,0 +1,27 @@
+import mysql.connector
+import csv
+
+mydb = mysql.connector.connect(
+  host="localhost",
+  user="kannanv",
+  passwd="V@mstiU1Md",
+  database="sbn_aws_test1"
+)
+mycursor = mydb.cursor()
+
+try:
+ with open('/an/earth_a/kannanv/test.csv') as csvfile:
+    readCSV = csv.reader(csvfile, delimiter=',')
+    for row in readCSV:
+      split = row[0].split("/")
+      sql = "INSERT INTO aws_inventory (dataset_id, filename, filesize,sha256_tree_hash, AWS_region, AWS_vault_name, AWS_archive_id, AWS_location,upload_date, delete_date, latest_flag, comments) VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s, %s)" 
+      val = (split[0],split[1], row[2], row[4], "us-east-2", row[1], row[3], row[5], row[6], " ","1", " " )
+      mycursor.execute(sql,val)
+      mydb.commit()
+    mycursor.execute("SELECT * FROM aws_inventory")
+    myresult = mycursor.fetchall()
+    for x in myresult:
+        print(x)
+
+except IndexError:
+  print("ioeror"
