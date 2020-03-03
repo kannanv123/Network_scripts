@@ -1,0 +1,86 @@
+import os
+import hashlib
+import sys
+
+i = 0
+#For parsing CLI prompt using python
+while(1):
+ try:
+  vault_name = input(sys.argv[1])
+  file_location = input(sys.argv[2])
+  #for finding Hash using sha 256
+  def sha256(file_location):
+   sha256_hash = hashlib.sha256()
+   with open(file_location,"rb") as f:
+    # Read and update hash string value in blocks of 4K
+     for byte_block in iter(lambda: f.read(4096),b""):
+        sha256_hash.update(byte_block)
+     return(sha256_hash.hexdigest())
+
+  def splitall(path):
+    allparts = []
+    while 1:
+        parts = os.path.split(path)
+        if parts[0] == path:  # sentinel for absolute paths
+            allparts.insert(0, parts[0])
+            break
+        elif parts[1] == path: # sentinel for relative paths
+            allparts.insert(0, parts[1])
+            break
+        else:
+            path = parts[0]
+            allparts.insert(0, parts[1])
+            return allparts  
+  
+
+  #for finding the size of the bytes
+  size = os.path.getsize(file_location)
+  size2 = 800 #size <4gb
+
+  #if the fie size greater than 40 Tb
+  if(size > 42949672960):
+     continue 
+
+#if the size of the file is less than 4gb 
+  if (size < size2):
+    checksum = sha256(file_location);
+    #uploading data to the archieve in single upload
+    print('aws glacier upload-archive --account-id - --vault-name ' + vault_name + " --body "+ file_location + " --checksum " + checksum + ' --archive-description "description"')
+
+#if the size of the file greater than 4gb
+  else:
+    range1 = 0
+    #upload_id = print('aws glacier initiate-multipart-upload --account-id - --part-size' + str(size2) +' --vault-name '+ vault_name + ' --archive-description "multipart upload test"') 
+    upload_id = '9378638392223938982'
+    modified_size = size
+    file = splitall(file_location[0])
+    print('split -a 5 -d -b'+ str(size2) + file_location + 'workarea/'+file + '_')
+    while (modified_size > 0):
+      counter = 1  
+      if(modified_size >= size2):  
+        set_range = str(range1)+'-' + str(range1+size2-1) +'/*'
+        a = ["%05d" %  counter]
+        workarea = ('workarea/'+file+'_'+ a[0])
+        checksum = sha256(workarea);
+        print('aws glacier upload-multipart-part --body part1 --range ' + 'bytes '+ set_range+ ' --account-id - --vault-name ' + vault_name + ' --upload-id ' + upload_id + ' --checksum ' + checksum  )
+        modified_size = modified_size  - size2
+        range1+= size2
+        counter+=1
+      else:
+        a = ["%05d" %  counter]
+        workarea = ('workarea/'+file+'_'+ a[0])
+        checksum = sha256(workarea);
+        set_range = str(range1)+'-' + str(range1+modified_size) +'/*'    
+        print('aws glacier upload-multipart-part --body part1 --range ' + 'bytes '+ set_range + '--account-id - --vault-name' + vault_name + ' --upload-id ' + upload_id + ' --checksum ' + checksum) 
+        break
+    checksum = sha256(file_location);
+    print('aws glacier complete-multipart-upload --archive-size '+ str(size) +' --checksum ' + checksum +' --account-id -' +' --vault-name ' + vault_name + ' --upload-id ' + upload_id)
+    i = i+1
+    
+ #stop the program once the file got uploaded 
+ except FileNotFoundError:
+    continue
+
+ except:     
+  e = sys.exit()
+  print(e)
