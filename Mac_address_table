@@ -4,8 +4,14 @@ iosvl2 = driver('******', '******', '*******')
 iosvl2.open()
  
 print iosvl2.get_facts()
- 
+
+
+#To get the Mac Address Table
 ios_output = iosvl2.get_mac_address_table()
+print (json.dumps(ios_output, sort_keys=True, indent=4))
+
+#To get the Arp Table
+ios_output = iosvl2.get_arp_table()
 print (json.dumps(ios_output, sort_keys=True, indent=4))
  
 iosvl2.close()
