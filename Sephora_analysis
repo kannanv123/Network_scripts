@@ -1,0 +1,37 @@
+import pandas as pd
+from bs4 import BeautifulSoup
+import requests
+import time
+import json
+url = "https://www.sephora.com/shop/skincare"
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+
+
+def getNavURLs(url):
+    navbar = []
+    request = requests.get(url)
+    time.sleep(5)
+    data=request.text
+    soup = BeautifulSoup(data, 'html.parser')
+    tags = soup.find_all('a',{'class': 'css-1leg7f4'})
+    for tag in tags:
+        navbar.append('https://www.sephora.com' + tag['href'])
+    return navbar[5:15]
+
+nav = getNavURLs(url)
+url = nav[0]
+driver = webdriver.Chrome()
+driver.get(url)
+lenofpage = driver.execute_script("window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;")
+match=False
+while(match==False):
+     lastCount = lenOfPage
+     time.sleep(3)
+     lenOfPage = browser.execute_script("window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;")
+     if lastCount==lenOfPage:
+         match=True
+source_data = driver.page_source
+soup = BeautifulSoup(source_data, 'html.parser')
+tags = soup.find_all('a')
+print(tags)
