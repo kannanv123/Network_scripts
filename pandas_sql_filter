@@ -1,0 +1,12 @@
+df1 = df17[[&#39;occ_code&#39;,&#39;occ_title&#39;,&#39;naics&#39;,&#39;tot_emp&#39;,&#39;own_code&#39;,&#39;area_title&#39;]]
+df2 = df13[[&#39;naics&#39;,&#39;occ_code&#39;,&#39;tot_emp&#39;,&#39;occ_title&#39;,&#39;area_title&#39;,&#39;own_code&#39;]]
+result = pd.merge(df1, df2, on=[&#39;area_title&#39;,&#39;occ_code&#39;,&#39;naics&#39;,&#39;own_code&#39;], how=&#39;inner&#39;)
+
+result = result[(result.area_title == &#39;U.S.&#39;) &amp; (result.tot_emp_y != &#39;**&#39;) &amp;((result.naics.str[0]==
+&#39;0&#39;)&amp;(result.naics.str[-1] == &#39;0&#39;)) &amp; (result.tot_emp_x != &#39;**&#39;) &amp; (result.occ_code.str[-1]!= &#39;0&#39; )]
+result[&#39;change&#39;] = result.tot_emp_x - result.tot_emp_y
+result[&#39;growth&#39;] = (result[&#39;change&#39;] / result.tot_emp_y)*100
+result = result.sort_values(&#39;growth&#39;,ascending= False)
+result = result.head(10)
+result = result[[&#39;occ_code&#39;, &#39;occ_title_x&#39;,&#39;tot_emp_x&#39;,&#39;tot_emp_y&#39;,&#39;change&#39;,&#39;growth&#39;]]
+print(result)
